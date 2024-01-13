@@ -249,90 +249,61 @@ impl Default for Clash {
 }
 
 impl Clash {
-    pub fn run(&mut self, config_path: &String, skip_proxy: bool, override_dns: bool, enhanced_mode: EnhancedMode) -> Result<(), ClashError> {
-        // decky 插件数据目录 
-        let decky_data_dir = get_decky_data_dir().unwrap();
-        let new_country_db_path = get_current_working_dir()
-            .unwrap()
-            .join("bin/core/country.mmdb");
-        let new_asn_db_path = get_current_working_dir()
-            .unwrap()
-            .join("bin/core/asn.mmdb");
-        let new_geosite_path = get_current_working_dir()
-            .unwrap()
-            .join("bin/core/geosite.dat");
-        let country_db_path = decky_data_dir.join("country.mmdb");
-        let asn_db_path = decky_data_dir.join("asn.mmdb");
-        let geosite_path = decky_data_dir.join("geosite.dat");
-
-        // 检查 decky_data_dir 是否存在，不存在则创建
-        if !decky_data_dir.exists() {
-            fs::create_dir_all(&decky_data_dir).unwrap();
-        }
-
-        // 检查数据库文件是否存在，不存在则复制
-        if !PathBuf::from(country_db_path.clone()).is_file() {
-            match fs::copy(
-                new_country_db_path.clone(),
-                country_db_path.clone(),
-            ) {
-                Ok(_) => {
-                    log::info!("Copy country.mmdb to decky data dir")
-                },
-                Err(e) => {
-                    return Err(ClashError {
-                        Message: e.to_string(),
-                        ErrorKind: ClashErrorKind::CpDbError,
-                    });
-                }
-            }
-        }
-
-        if !PathBuf::from(asn_db_path.clone()).is_file() {
-            match fs::copy(
-                new_asn_db_path.clone(),
-                asn_db_path.clone(),
-            ) {
-                Ok(_) => {
-                    log::info!("Copy asn.mmdb to decky data dir")
-                },
-                Err(e) => {
-                    return Err(ClashError {
-                        Message: e.to_string(),
-                        ErrorKind: ClashErrorKind::CpDbError,
-                    });
-                }
-            }
-        }
-        
-        if !PathBuf::from(geosite_path.clone()).is_file() {
-            match fs::copy(
-                new_geosite_path.clone(),
-                geosite_path.clone(),
-            ) {
-                Ok(_) => {
-                    log::info!("Copy geosite.dat to decky data dir")
-                },
-                Err(e) => {
-                    return Err(ClashError {
-                        Message: e.to_string(),
-                        ErrorKind: ClashErrorKind::CpDbError,
-                    });
-                }
-            }
-        }
-
+    pub fn run(&mut self, config_path: &String, skip_proxy: bool) -> Result<(), ClashError> {
+        //没有 Country.mmdb
+        // let country_db_path = "/root/.config/clash/Country.mmdb";
+        // if let Some(parent) = PathBuf::from(country_db_path).parent() {
+        //     if let Err(e) = std::fs::create_dir_all(parent) {
+        //         log::error!("Failed while creating /root/.config/clash dir.");
+        //         log::error!("Error Message:{}", e);
+        //         return Err(ClashError {
+        //             ErrorKind: ClashErrorKind::CpDbError,
+        //             Message: "Error occurred while creating /root/.config/clash dir.".to_string(),
+        //         });
+        //     }
+        // }
+        // let new_country_db_path = get_current_working_dir()
+        //     .unwrap()
+        //     .join("bin/core/Country.mmdb");
+        // if !PathBuf::from(country_db_path).is_file() {
+        //     match fs::copy(new_country_db_path, country_db_path) {
+        //         Ok(_) => {
+        //             log::info!("cp Country.mmdb to .clash dir");
+        //         }
+        //         Err(e) => {
+        //             log::info!("Error occurred while coping Country.mmdb");
+        //             return Err(ClashError {
+        //                 Message: e.to_string(),
+        //                 ErrorKind: ClashErrorKind::CpDbError,
+        //             });
+        //         }
+        //     }
+        // }
         self.update_config_path(config_path);
         // 修改配置文件为推荐配置
-        match self.change_config(skip_proxy, override_dns, enhanced_mode) {
-            Ok(_) => (),
-            Err(e) => {
-                return Err(ClashError {
-                    Message: e.to_string(),
-                    ErrorKind: ClashErrorKind::ConfigFormatError,
-                });
-            }
-        }
+        // match self.change_config(skip_proxy) {
+        //     Ok(_) => (),
+        //     Err(e) => {
+        //         return Err(ClashError {
+        //             Message: e.to_string(),
+        //             ErrorKind: ClashErrorKind::ConfigFormatError,
+        //         });
+        //     }
+        // }
+        //在 clash 启动前修改 DNS
+        //先结束 systemd-resolve ，否则会因为端口占用启动失败
+        // match helper::set_system_network() {
+        //     Ok(_) => {
+        //         log::info!("Successfully set network status");
+        //     }
+        //     Err(e) => {
+        //         log::error!("Error occurred while setting system network: {}", e);
+        //         return Err(ClashError {
+        //             Message: e.to_string(),
+        //             ErrorKind: ClashErrorKind::NetworkError,
+        //         });
+        //     }
+        // }
 
         //log::info!("Pre-setting network");
         //TODO: 未修改的 unwarp
@@ -340,12 +311,28 @@ impl Clash {
         let outputs = fs::File::create("/tmp/tomoon.clash.log").unwrap();
         let errors = outputs.try_clone().unwrap();
 
-        log::info!("Starting Clash...");
+        // let smartdns_path = get_current_working_dir()
+        //     .unwrap()
+        //     .join("bin/smartdns/smartdns");
+
+        // let smartdns_config_path = get_current_working_dir()
+        //     .unwrap()
+        //     .join("bin/smartdns/config.conf");
+
+        // let smartdns_outputs = fs::File::create("/tmp/tomoon.smartdns.log").unwrap();
+        // let smartdns_errors = outputs.try_clone().unwrap();
+
+        // 启动 SmartDNS 作为 DNS 上游
+        // let smart_dns = Command::new(smartdns_path)
+        //     .arg("-c")
+        //     .arg(smartdns_config_path)
+        //     .arg("-f")
+        //     // .stdout(smartdns_outputs)
+        //     // .stderr(smartdns_errors)
+        //     .spawn();
 
         let clash = Command::new(self.path.clone())
-            .arg("-d")
-            .arg(decky_data_dir)
-            .arg("-f")
+            .arg("run -c")
             .arg(run_config)
             .stdout(outputs)
             .stderr(errors)
