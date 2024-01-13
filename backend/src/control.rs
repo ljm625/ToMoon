@@ -548,7 +548,7 @@ impl Clash {
         //     }
         // }
 
-        // let run_config = get_current_working_dir()?.join("bin/core/running_config.yaml");
+        let run_config = get_current_working_dir()?.join("bin/core/running_config.yaml");
 
         // let yaml_str = serde_yaml::to_string(&yaml)?;
         fs::write(run_config, config)?;
