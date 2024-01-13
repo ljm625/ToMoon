@@ -384,7 +384,7 @@ impl Clash {
         if let Some(experimental) = json_value.get_mut("experimental") {
             if let Some(clash_api) = experimental.get_mut("clash_api") {
                 if let Some(external_ui) = clash_api.get_mut("external_ui") {
-                    *external_ui = json!(webui_dir.to_str());
+                    *external_ui = serde_json::json!(webui_dir.to_str());
                 }
             }
         }
