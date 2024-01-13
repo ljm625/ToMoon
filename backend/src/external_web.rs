@@ -183,7 +183,7 @@ pub async fn download_sub(
                     }));
                 }
             };
-            if !helper::check_yaml(&file_content) {
+            if !helper::check_json(&file_content) {
                 log::error!("The downloaded subscription is not a legal profile.");
                 return Err(actix_web::Error::from(ClashError {
                     Message: "The downloaded subscription is not a legal profile.".to_string(),
@@ -267,7 +267,7 @@ pub async fn download_sub(
         {
             Ok(x) => {
                 let response = x.as_str().unwrap();
-                if !helper::check_yaml(&String::from(response)) {
+                if !helper::check_json(&String::from(response)) {
                     log::error!("The downloaded subscription is not a legal profile.");
                     return Err(actix_web::Error::from(ClashError {
                         Message: "The downloaded subscription is not a legal profile.".to_string(),
