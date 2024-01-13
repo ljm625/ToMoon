@@ -1,8 +1,4 @@
-on:
-  push:
-    tags:        
-      - 'v*'           # Push events to every tag not containing /
-
+on: workflow_dispatch
 name:  ToMoon Auto Build
 
 jobs:
