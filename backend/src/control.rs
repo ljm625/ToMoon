@@ -378,6 +378,19 @@ impl Clash {
         // let mut json_config: serde_json::Value = serde_json::from_str(config.as_str())?;
         // let json_config = json_config.as_mapping_mut().unwrap();
 
+        let mut json_value: Value = serde_json::from_str(config)?;
+        let webui_dir = get_current_working_dir()?.join("bin/core/web");
+
+        if let Some(experimental) = json_value.get_mut("experimental") {
+            if let Some(clash_api) = experimental.get_mut("clash_api") {
+                if let Some(external_ui) = clash_api.get_mut("external_ui") {
+                    *external_ui = json!(webui_dir.to_str());
+                }
+            }
+        }
+
+        let modified_json = serde_json::to_string(&json_value)?;
+    
         // //修改 WebUI
 
         // match yaml.get_mut("external-controller") {
@@ -517,7 +530,7 @@ impl Clash {
         let run_config = get_current_working_dir()?.join("bin/core/running_config.yaml");
 
         // let yaml_str = serde_yaml::to_string(&yaml)?;
-        fs::write(run_config, config)?;
+        fs::write(run_config, modified_json)?;
         Ok(())
     }
 

@@ -76,7 +76,7 @@ pub fn is_clash_running() -> bool {
     let mut sys = System::new_all();
     sys.refresh_all();
     for (_, process) in sys.processes() {
-        if process.name() == "clash" {
+        if process.name() == "sing-box" {
             return true;
         }
     }
