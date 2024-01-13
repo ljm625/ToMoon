@@ -14,6 +14,8 @@ jobs:
       - name: download asset files
         run: wget https://github.com/SagerNet/sing-box/releases/download/v1.8.0/sing-box-1.8.0-linux-amd64.tar.gz
       - run: tar xzvf sing-box-1.8.0-linux-amd64.tar.gz -C /tmp/
+      - run: wget https://github.com/YukiCoco/ToMoon/releases/download/build/build_assets.zip
+      - run: unzip -n build_assets.zip -d tmp/
       # build front-end start
       - uses: actions/setup-node@v3
         with:
