@@ -205,7 +205,7 @@ pub struct Clash {
     pub path: std::path::PathBuf,
     pub config: std::path::PathBuf,
     pub instence: Option<Child>,
-    pub smartdns_instence: Option<Child>,
+    // pub smartdns_instence: Option<Child>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -254,7 +254,7 @@ impl Default for Clash {
                 .unwrap()
                 .join("bin/core/config.yaml"),
             instence: None,
-            smartdns_instence: None,
+            // smartdns_instence: None,
         }
     }
 }
@@ -262,59 +262,59 @@ impl Default for Clash {
 impl Clash {
     pub fn run(&mut self, config_path: &String, skip_proxy: bool) -> Result<(), ClashError> {
         //没有 Country.mmdb
-        let country_db_path = "/root/.config/clash/Country.mmdb";
-        if let Some(parent) = PathBuf::from(country_db_path).parent() {
-            if let Err(e) = std::fs::create_dir_all(parent) {
-                log::error!("Failed while creating /root/.config/clash dir.");
-                log::error!("Error Message:{}", e);
-                return Err(ClashError {
-                    ErrorKind: ClashErrorKind::CpDbError,
-                    Message: "Error occurred while creating /root/.config/clash dir.".to_string(),
-                });
-            }
-        }
-        let new_country_db_path = get_current_working_dir()
-            .unwrap()
-            .join("bin/core/Country.mmdb");
-        if !PathBuf::from(country_db_path).is_file() {
-            match fs::copy(new_country_db_path, country_db_path) {
-                Ok(_) => {
-                    log::info!("cp Country.mmdb to .clash dir");
-                }
-                Err(e) => {
-                    log::info!("Error occurred while coping Country.mmdb");
-                    return Err(ClashError {
-                        Message: e.to_string(),
-                        ErrorKind: ClashErrorKind::CpDbError,
-                    });
-                }
-            }
-        }
+        // let country_db_path = "/root/.config/clash/Country.mmdb";
+        // if let Some(parent) = PathBuf::from(country_db_path).parent() {
+        //     if let Err(e) = std::fs::create_dir_all(parent) {
+        //         log::error!("Failed while creating /root/.config/clash dir.");
+        //         log::error!("Error Message:{}", e);
+        //         return Err(ClashError {
+        //             ErrorKind: ClashErrorKind::CpDbError,
+        //             Message: "Error occurred while creating /root/.config/clash dir.".to_string(),
+        //         });
+        //     }
+        // }
+        // let new_country_db_path = get_current_working_dir()
+        //     .unwrap()
+        //     .join("bin/core/Country.mmdb");
+        // if !PathBuf::from(country_db_path).is_file() {
+        //     match fs::copy(new_country_db_path, country_db_path) {
+        //         Ok(_) => {
+        //             log::info!("cp Country.mmdb to .clash dir");
+        //         }
+        //         Err(e) => {
+        //             log::info!("Error occurred while coping Country.mmdb");
+        //             return Err(ClashError {
+        //                 Message: e.to_string(),
+        //                 ErrorKind: ClashErrorKind::CpDbError,
+        //             });
+        //         }
+        //     }
+        // }
         self.update_config_path(config_path);
         // 修改配置文件为推荐配置
-        match self.change_config(skip_proxy) {
-            Ok(_) => (),
-            Err(e) => {
-                return Err(ClashError {
-                    Message: e.to_string(),
-                    ErrorKind: ClashErrorKind::ConfigFormatError,
-                });
-            }
-        }
+        // match self.change_config(skip_proxy) {
+        //     Ok(_) => (),
+        //     Err(e) => {
+        //         return Err(ClashError {
+        //             Message: e.to_string(),
+        //             ErrorKind: ClashErrorKind::ConfigFormatError,
+        //         });
+        //     }
+        // }
         //在 clash 启动前修改 DNS
         //先结束 systemd-resolve ，否则会因为端口占用启动失败
-        match helper::set_system_network() {
-            Ok(_) => {
-                log::info!("Successfully set network status");
-            }
-            Err(e) => {
-                log::error!("Error occurred while setting system network: {}", e);
-                return Err(ClashError {
-                    Message: e.to_string(),
-                    ErrorKind: ClashErrorKind::NetworkError,
-                });
-            }
-        }
+        // match helper::set_system_network() {
+        //     Ok(_) => {
+        //         log::info!("Successfully set network status");
+        //     }
+        //     Err(e) => {
+        //         log::error!("Error occurred while setting system network: {}", e);
+        //         return Err(ClashError {
+        //             Message: e.to_string(),
+        //             ErrorKind: ClashErrorKind::NetworkError,
+        //         });
+        //     }
+        // }
 
         //log::info!("Pre-setting network");
         //TODO: 未修改的 unwarp
@@ -324,28 +324,28 @@ impl Clash {
         let outputs = fs::File::create("/tmp/tomoon.clash.log").unwrap();
         let errors = outputs.try_clone().unwrap();
 
-        let smartdns_path = get_current_working_dir()
-            .unwrap()
-            .join("bin/smartdns/smartdns");
+        // let smartdns_path = get_current_working_dir()
+        //     .unwrap()
+        //     .join("bin/smartdns/smartdns");
 
-        let smartdns_config_path = get_current_working_dir()
-            .unwrap()
-            .join("bin/smartdns/config.conf");
+        // let smartdns_config_path = get_current_working_dir()
+        //     .unwrap()
+        //     .join("bin/smartdns/config.conf");
 
         // let smartdns_outputs = fs::File::create("/tmp/tomoon.smartdns.log").unwrap();
         // let smartdns_errors = outputs.try_clone().unwrap();
 
         // 启动 SmartDNS 作为 DNS 上游
-        let smart_dns = Command::new(smartdns_path)
-            .arg("-c")
-            .arg(smartdns_config_path)
-            .arg("-f")
-            // .stdout(smartdns_outputs)
-            // .stderr(smartdns_errors)
-            .spawn();
+        // let smart_dns = Command::new(smartdns_path)
+        //     .arg("-c")
+        //     .arg(smartdns_config_path)
+        //     .arg("-f")
+        //     // .stdout(smartdns_outputs)
+        //     // .stderr(smartdns_errors)
+        //     .spawn();
 
         let clash = Command::new(self.path.clone())
-            .arg("-f")
+            .arg("run -c")
             .arg(run_config)
             .stdout(outputs)
             .stderr(errors)
@@ -359,7 +359,7 @@ impl Clash {
             }
         };
         self.instence = Some(clash.unwrap());
-        self.smartdns_instence = Some(smart_dns.unwrap());
+        // self.smartdns_instence = Some(smart_dns.unwrap());
         Ok(())
     }
 
@@ -389,16 +389,16 @@ impl Clash {
                 log::error!("Error occurred while disabling Clash: Not launch Clash yet");
             }
         };
-        let smartdns_instance = self.smartdns_instence.as_mut();
-        match smartdns_instance {
-            Some(x) => {
-                x.kill()?;
-                x.wait()?;
-            }
-            None => {
-                log::error!("Error occurred while disabling SmartDNS : Not launch SmartDNS yet");
-            }
-        };
+        // let smartdns_instance = self.smartdns_instence.as_mut();
+        // match smartdns_instance {
+        //     Some(x) => {
+        //         x.kill()?;
+        //         x.wait()?;
+        //     }
+        //     None => {
+        //         log::error!("Error occurred while disabling SmartDNS : Not launch SmartDNS yet");
+        //     }
+        // };
         Ok(())
     }
 

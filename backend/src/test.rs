@@ -274,9 +274,8 @@ mod tests {
     #[test]
     fn debug_log() {
         let running_status = format!(
-            "Clash status : {}, SmartDNS status: {} \n",
-            helper::is_clash_running(),
-            helper::is_samrtdns_running()
+            "Clash status : {}\n",
+            helper::is_clash_running()
         );
         let tomoon_log = match fs::read_to_string("/tmp/tomoon.log") {
             Ok(x) => x,
