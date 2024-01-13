@@ -374,8 +374,8 @@ impl Clash {
     pub fn change_config(&self, skip_proxy: bool, override_dns: bool, enhanced_mode: EnhancedMode) -> Result<(), Box<dyn error::Error>> {
         let path = self.config.clone();
         let config = fs::read_to_string(path)?;
-        // let mut yaml: serde_yaml::Value = serde_yaml::from_str(config.as_str())?;
-        // let yaml = yaml.as_mapping_mut().unwrap();
+        // let mut json_config: serde_json::Value = serde_json::from_str(config.as_str())?;
+        // let json_config = json_config.as_mapping_mut().unwrap();
 
         // //修改 WebUI
 

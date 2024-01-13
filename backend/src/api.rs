@@ -189,7 +189,7 @@ pub fn download_sub(runtime: &ControlRuntime) -> impl Fn(Vec<Primitive>) -> Vec<
                                         return;
                                     }
                                 };
-                                if !helper::check_yaml(&file_content) {
+                                if !helper::check_json(&file_content) {
                                     log::error!("The downloaded subscription is not a legal profile.");
                                     update_status(DownloadStatus::Error);
                                     return;
@@ -255,7 +255,7 @@ pub fn download_sub(runtime: &ControlRuntime) -> impl Fn(Vec<Primitive>) -> Vec<
                             {
                                 Ok(x) => {
                                     let response = x.as_str().unwrap();
-                                    if !helper::check_yaml(&String::from(response)) {
+                                    if !helper::check_json(&String::from(response)) {
                                         log::error!("The downloaded subscription is not a legal profile.");
                                         update_status(DownloadStatus::Error);
                                         return;
@@ -517,7 +517,7 @@ pub fn update_subs(runtime: &ControlRuntime) -> impl Fn(Vec<Primitive>) -> Vec<P
                                             return;
                                         }
                                     };
-                                    if !helper::check_yaml(&response.to_string()) {
+                                    if !helper::check_json(&response.to_string()) {
                                         log::error!("The downloaded subscription is not a legal profile.");
                                         return;
                                     }
