@@ -332,7 +332,8 @@ impl Clash {
         //     .spawn();
 
         let clash = Command::new(self.path.clone())
-            .arg("run -c")
+            .arg("run")
+            .arg("-c")
             .arg(run_config)
             .stdout(outputs)
             .stderr(errors)
