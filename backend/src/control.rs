@@ -378,7 +378,7 @@ impl Clash {
         // let mut json_config: serde_json::Value = serde_json::from_str(config.as_str())?;
         // let json_config = json_config.as_mapping_mut().unwrap();
 
-        let mut json_value: Value = serde_json::from_str(config)?;
+        let mut json_value: Value = serde_json::from_str(config.as_str())?;
         let webui_dir = get_current_working_dir()?.join("bin/core/web");
 
         if let Some(experimental) = json_value.get_mut("experimental") {
