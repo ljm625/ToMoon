@@ -65,21 +65,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: tomoon-artifacts
-          path: ./release/tomoon.zip
-          if-no-files-found: error
-
-
-  publish:
-    name: Publish Release
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    needs: build_plugin
-    steps:
-      - run: mkdir /tmp/artifacts
-
-      - name: download artifact
-        uses: actions/download-artifact@v4
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ env.RELEASE_VERSION }}
+          #body_path: Changelog/${{ env.RELEASE_VERSION }}-changelog.md
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           path: /tmp/artifacts
 
