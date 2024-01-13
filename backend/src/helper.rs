@@ -60,7 +60,7 @@ pub fn check_yaml(str: &String) -> bool {
 }
 pub fn check_json(str: &String) -> bool {
     if let Ok(x) = serde_json::from_str::<serde_json::Value>(str) {
-        if x.contains_key("inbounds") {
+        if let Some(value) = x.get("inbound") {
             return true;
         } else {
             return false;
