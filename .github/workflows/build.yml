@@ -1,11 +1,5 @@
-name: ToMoon Auto Build
-
-on:
-  - push
-  - pull_request
-
-permissions:
-  contents: write
+on: workflow_dispatch
+name:  ToMoon Auto Build
 
 jobs:
   build_plugin:
