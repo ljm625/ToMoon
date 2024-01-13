@@ -72,7 +72,7 @@ jobs:
               cp main.py ./release/tomoon/main.py
               cp plugin.json ./release/tomoon/plugin.json
               cp package.json ./release/tomoon/package.json
-              cp -r ./tmp/sing-box-1.8.0-linux-amd64/sing-box ./release/tomoon/bin/core
+              cp -r /tmp/sing-box-1.8.0-linux-amd64/sing-box ./release/tomoon/bin/core
               cp -r ./tomoon-web/dist ./release/tomoon/web
               cd ./release 
               zip -r tomoon-${{ env.RELEASE_VERSION }}.zip tomoon
