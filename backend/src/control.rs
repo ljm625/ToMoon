@@ -239,7 +239,7 @@ impl ClashError {
 impl Default for Clash {
     fn default() -> Self {
         Self {
-            path: get_current_working_dir().unwrap().join("bin/core/clash"),
+            path: get_current_working_dir().unwrap().join("bin/core/sing-box"),
             config: get_current_working_dir()
                 .unwrap()
                 .join("bin/core/config.yaml"),
@@ -281,15 +281,15 @@ impl Clash {
         // }
         self.update_config_path(config_path);
         // 修改配置文件为推荐配置
-        // match self.change_config(skip_proxy) {
-        //     Ok(_) => (),
-        //     Err(e) => {
-        //         return Err(ClashError {
-        //             Message: e.to_string(),
-        //             ErrorKind: ClashErrorKind::ConfigFormatError,
-        //         });
-        //     }
-        // }
+        match self.change_config(skip_proxy) {
+            Ok(_) => (),
+            Err(e) => {
+                return Err(ClashError {
+                    Message: e.to_string(),
+                    ErrorKind: ClashErrorKind::ConfigFormatError,
+                });
+            }
+        }
         //在 clash 启动前修改 DNS
         //先结束 systemd-resolve ，否则会因为端口占用启动失败
         // match helper::set_system_network() {
@@ -374,194 +374,149 @@ impl Clash {
     pub fn change_config(&self, skip_proxy: bool, override_dns: bool, enhanced_mode: EnhancedMode) -> Result<(), Box<dyn error::Error>> {
         let path = self.config.clone();
         let config = fs::read_to_string(path)?;
-        let mut yaml: serde_yaml::Value = serde_yaml::from_str(config.as_str())?;
-        let yaml = yaml.as_mapping_mut().unwrap();
+        // let mut yaml: serde_yaml::Value = serde_yaml::from_str(config.as_str())?;
+        // let yaml = yaml.as_mapping_mut().unwrap();
 
-        log::info!("Changing Clash config...");
+        // //修改 WebUI
 
-        //修改 WebUI
+        // match yaml.get_mut("external-controller") {
+        //     Some(x) => {
+        //         *x = Value::String(String::from("127.0.0.1:9090"));
+        //     }
+        //     None => {
+        //         yaml.insert(
+        //             Value::String(String::from("external-controller")),
+        //             Value::String(String::from("127.0.0.1:9090")),
+        //         );
+        //     }
+        // }
 
-        match yaml.get_mut("external-controller") {
-            Some(x) => {
-                *x = Value::String(String::from("127.0.0.1:9090"));
-            }
-            None => {
-                yaml.insert(
-                    Value::String(String::from("external-controller")),
-                    Value::String(String::from("127.0.0.1:9090")),
-                );
-            }
-        }
+        // //修改 test.steampowered.com
+        // //这个域名用于 Steam Deck 网络连接验证，可以直连
+        // if let Some(x) = yaml.get_mut("rules") {
+        //     let rules = x.as_sequence_mut().unwrap();
+        //     rules.insert(
+        //         0,
+        //         Value::String(String::from("DOMAIN,test.steampowered.com,DIRECT")),
+        //     );
 
-        //修改 test.steampowered.com
-        //这个域名用于 Steam Deck 网络连接验证，可以直连
-        if let Some(x) = yaml.get_mut("rules") {
-            let rules = x.as_sequence_mut().unwrap();
-            rules.insert(
-                0,
-                Value::String(String::from("DOMAIN,test.steampowered.com,DIRECT")),
-            );
+        //     if skip_proxy {
+        //         rules.insert(
+        //         0,
+        //         Value::String(String::from("DOMAIN-SUFFIX,cm.steampowered.com,DIRECT")),
+        //     );
+        //     }
+        // }
 
-            if skip_proxy {
-                rules.insert(
-                0,
-                Value::String(String::from("DOMAIN-SUFFIX,cm.steampowered.com,DIRECT")),
-            );
-            rules.insert(
-            0,
-            Value::String(String::from("DOMAIN-SUFFIX,steamserver.net,DIRECT")),
-        );
-            }
-        }
+        // //下载 rules-provider
+        // if let Some(x) = yaml.get_mut("rule-providers") {
+        //     let provider = x.as_mapping().unwrap();
+        //     match self.downlaod_proxy_providers(provider) {
+        //         Ok(_) => {
+        //             log::info!("All rules provider downloaded");
+        //         }
+        //         Err(e) => return Err(Box::new(e)),
+        //     }
+        // } else {
+        //     log::info!("no rule-providers found.");
+        // }
 
-        let webui_dir = get_current_working_dir()?.join("bin/core/web");
+        // let webui_dir = get_current_working_dir()?.join("bin/core/web");
 
-        match yaml.get_mut("external-ui") {
-            Some(x) => {
-                //TODO: 修改 Web UI 的路径
-                *x = Value::String(String::from(webui_dir.to_str().unwrap()));
-            }
-            None => {
-                yaml.insert(
-                    Value::String(String::from("external-ui")),
-                    Value::String(String::from(webui_dir.to_str().unwrap())),
-                );
-            }
-        }
+        // match yaml.get_mut("external-ui") {
+        //     Some(x) => {
+        //         //TODO: 修改 Web UI 的路径
+        //         *x = Value::String(String::from(webui_dir.to_str().unwrap()));
+        //     }
+        //     None => {
+        //         yaml.insert(
+        //             Value::String(String::from("external-ui")),
+        //             Value::String(String::from(webui_dir.to_str().unwrap())),
+        //         );
+        //     }
+        // }
 
-        //修改 TUN 和 DNS 配置
+        // //修改 TUN 和 DNS 配置
 
-        let tun_config = "
-        enable: true
-        stack: system
-        auto-route: true
-        auto-detect-interface: true
-        dns-hijack:
-            - any:53
-        ";
+        // let tun_config = "
+        // enable: true
+        // stack: system
+        // auto-route: true
+        // auto-detect-interface: true
+        // ";
 
-        //部分配置来自 https://www.xkww3n.cyou/2022/02/08/use-clash-dns-anti-dns-hijacking/
+        // //部分配置来自 https://www.xkww3n.cyou/2022/02/08/use-clash-dns-anti-dns-hijacking/
 
-        let dns_config_fakeip = "
-        enable: true
-        listen: 127.0.0.1:8853
-        default-nameserver:
-            - 223.5.5.5
-            - 8.8.4.4
-        ipv6: false
-        enhanced-mode: fake-ip
-        nameserver:
-            - 119.29.29.29
-            - 223.5.5.5
-            - tls://223.5.5.5:853
-            - tls://223.6.6.6:853
-        fallback:
-            - https://1.0.0.1/dns-query
-            - https://public.dns.iij.jp/dns-query
-            - tls://8.8.4.4:853
-        fallback-filter:
-            geoip: false
-            ipcidr:
-            - 240.0.0.0/4
-            - 0.0.0.0/32
-            - 127.0.0.1/32
-        fake-ip-filter:
-            - \"*.lan\"
-            - \"*.localdomain\"
-            - \"*.localhost\"
-            - \"*.local\"
-            - \"*.home.arpa\"
-            - stun.*.*
-            - stun.*.*.*
-            - +.stun.*.*
-            - +.stun.*.*.*
-            - +.stun.*.*.*.*
-        ";
+        // let dns_config = match helper::is_resolve_running() {
+        //     true => {
+        //         "
+        // enable: true
+        // listen: 0.0.0.0:5354
+        // enhanced-mode: fake-ip
+        // fake-ip-range: 198.18.0.1/16
+        // nameserver:
+        //     - tcp://127.0.0.1:5353
+        // "
+        //     }
+        //     false => {
+        //         "
+        // enable: true
+        // listen: 0.0.0.0:53
+        // enhanced-mode: fake-ip
+        // fake-ip-range: 198.18.0.1/16
+        // nameserver:
+        //     - tcp://127.0.0.1:5353
+        // "
+        //     }
+        // };
 
-        let dns_config_redir_host = "
-        enable: true
-        ipv6: false
-        listen: 127.0.0.1:8853
-        default-nameserver:
-            - 223.5.5.5
-            - 8.8.4.4
-        enhanced-mode: redir-host
-        nameserver:
-            - 119.29.29.29
-            - 223.5.5.5
-            - tls://223.5.5.5:853
-            - tls://223.6.6.6:853
-        fallback:
-            - https://1.0.0.1/dns-query
-            - https://public.dns.iij.jp/dns-query
-            - tls://8.8.4.4:853
-        fallback-filter:
-            geoip: false
-            ipcidr:
-            - 240.0.0.0/4
-            - 0.0.0.0/32
-            - 127.0.0.1/32
-        ";
+        // let profile_config = "
+        // store-selected: true
+        // store-fake-ip: false
+        // ";
 
-        let profile_config = "
-        store-selected: true
-        store-fake-ip: false
-        ";
+        // let insert_config = |yaml: &mut Mapping, config: &str, key: &str| {
+        //     let inner_config: Value = serde_yaml::from_str(config).unwrap();
+        //     yaml.insert(Value::String(String::from(key)), inner_config);
+        // };
 
-        let insert_config = |yaml: &mut Mapping, config: &str, key: &str| {
-            let inner_config: Value = serde_yaml::from_str(config).unwrap();
-            yaml.insert(Value::String(String::from(key)), inner_config);
-        };
+        // //开启 tun 模式
+        // match yaml.get("tun") {
+        //     Some(_) => {
+        //         yaml.remove("tun").unwrap();
+        //         insert_config(yaml, tun_config, "tun");
+        //     }
+        //     None => {
+        //         insert_config(yaml, tun_config, "tun");
+        //     }
+        // }
 
-        //开启 tun 模式
-        match yaml.get("tun") {
-            Some(_) => {
-                yaml.remove("tun").unwrap();
-                insert_config(yaml, tun_config, "tun");
-            }
-            None => {
-                insert_config(yaml, tun_config, "tun");
-            }
-        }
+        // match yaml.get("dns") {
+        //     Some(_) => {
+        //         //删除 DNS 配置
+        //         yaml.remove("dns").unwrap();
+        //         insert_config(yaml, dns_config, "dns");
+        //     }
+        //     None => {
+        //         insert_config(yaml, dns_config, "dns");
+        //     }
+        // }
 
-        match yaml.get("dns") {
-            Some(_) => {
-                //删除 DNS 配置
-                if override_dns {
-                    log::info!("EnhancedMode: {:?}", enhanced_mode);
-                    yaml.remove("dns").unwrap();
-                    match enhanced_mode {
-                        EnhancedMode::FakeIp => {
-                            insert_config(yaml, dns_config_fakeip, "dns");
-                        }
-                        EnhancedMode::RedirHost => {
-                            insert_config(yaml, dns_config_redir_host, "dns");
-                        }
-                    }
-                }
-            }
-            None => {
-                insert_config(yaml, dns_config_fakeip, "dns");
-            }
-        }
+        // // 保存上次的配置
+        // match yaml.get("profile") {
+        //     Some(_) => {
+        //         yaml.remove("profile").unwrap();
+        //         insert_config(yaml, profile_config, "profile");
+        //     }
+        //     None => {
+        //         insert_config(yaml, profile_config, "profile");
+        //     }
+        // }
 
-        // 保存上次的配置
-        match yaml.get("profile") {
-            Some(_) => {
-                yaml.remove("profile").unwrap();
-                insert_config(yaml, profile_config, "profile");
-            }
-            None => {
-                insert_config(yaml, profile_config, "profile");
-            }
-        }
+        // let run_config = get_current_working_dir()?.join("bin/core/running_config.yaml");
 
-        let run_config = get_decky_data_dir()?.join("running_config.yaml");
-
-        let yaml_str = serde_yaml::to_string(&yaml)?;
-        fs::write(run_config, yaml_str)?;
-
-        log::info!("Clash config changed successfully");
+        // let yaml_str = serde_yaml::to_string(&yaml)?;
+        fs::write(run_config, config)?;
         Ok(())
     }
 
