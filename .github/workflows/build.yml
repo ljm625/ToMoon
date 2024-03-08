@@ -14,8 +14,8 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       
       - name: download asset files
-        run: wget https://github.com/SagerNet/sing-box/releases/download/v1.8.0/sing-box-1.8.0-linux-amd64.tar.gz
-      - run: tar xzvf sing-box-1.8.0-linux-amd64.tar.gz -C /tmp/
+        run: wget https://github.com/SagerNet/sing-box/releases/download/v1.8.8/sing-box-1.8.8-linux-amd64.tar.gz
+      - run: tar xzvf sing-box-1.8.8-linux-amd64.tar.gz -C /tmp/
       - run: wget https://github.com/YukiCoco/ToMoon/releases/download/build/build_assets.zip
       - run: unzip -n build_assets.zip -d tmp/
       # build front-end start
@@ -53,7 +53,7 @@ jobs:
               cp main.py ./release/tomoon/main.py
               cp plugin.json ./release/tomoon/plugin.json
               cp package.json ./release/tomoon/package.json
-              cp -r /tmp/sing-box-1.8.0-linux-amd64/sing-box ./release/tomoon/bin/core
+              cp -r /tmp/sing-box-1.8.8-linux-amd64/sing-box ./release/tomoon/bin/core
               cp -r ./tomoon-web/dist ./release/tomoon/web
               cd ./release 
               zip -r tomoon-${{ env.RELEASE_VERSION }}.zip tomoon
