@@ -307,7 +307,7 @@ impl Clash {
 
         //log::info!("Pre-setting network");
         //TODO: 未修改的 unwarp
-        let run_config = decky_data_dir.join("running_config.yaml");
+        let run_config = get_current_working_dir()?.join("bin/core/running_config.yaml");
         let outputs = fs::File::create("/tmp/tomoon.clash.log").unwrap();
         let errors = outputs.try_clone().unwrap();
 
@@ -372,7 +372,7 @@ impl Clash {
         self.config = std::path::PathBuf::from((*path).clone());
     }
 
-    pub fn change_config(&self, skip_proxy: bool, override_dns: bool, enhanced_mode: EnhancedMode) -> Result<(), Box<dyn error::Error>> {
+    pub fn change_config(&self, skip_proxy: bool) -> Result<(), Box<dyn error::Error>> {
         let path = self.config.clone();
         let config = fs::read_to_string(path)?;
         // let mut json_config: serde_json::Value = serde_json::from_str(config.as_str())?;
