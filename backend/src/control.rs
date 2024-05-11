@@ -307,7 +307,9 @@ impl Clash {
 
         //log::info!("Pre-setting network");
         //TODO: 未修改的 unwarp
-        let run_config = get_current_working_dir()?.join("bin/core/running_config.yaml");
+        let run_config = get_current_working_dir()
+        .unwrap()
+        .join("bin/core/running_config.yaml");
         let outputs = fs::File::create("/tmp/tomoon.clash.log").unwrap();
         let errors = outputs.try_clone().unwrap();
 
